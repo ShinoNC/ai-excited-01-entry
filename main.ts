@@ -1,13 +1,23 @@
 // SPDX-License-Identifier: MIT
-// ai-excited-01: the entry program. It places the image at the output
-// path byte-for-byte, so the judged bytes are exactly the repo bytes.
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+// ai-excited-01 entry runner.
+//
+// The judged artifact is a single image stored in this repo as entry.png.
+// This program's only job is to place an exact copy of that image at the
+// output location the platform expects. Nothing is generated, resized, or
+// re-encoded at run time, so the bytes the judge sees are exactly the
+// bytes committed here.
+//
+// The source image is found relative to this file, never relative to the
+// process working directory, so the program works no matter where it is
+// launched from. The destination comes from MAKEFUN_OUTPUT_DIR and falls
+// back to /output when the variable is not set.
+import { copyFileSync, mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = dirname(fileURLToPath(import.meta.url));
-const target = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
-const bytes = readFileSync(resolve(root, "entry.png"));
+const here = dirname(fileURLToPath(import.meta.url));
+const sourceImage = join(here, "entry.png");
 
-mkdirSync(target, { recursive: true });
-writeFileSync(resolve(target, "entry.png"), bytes);
+const outDir = process.env.MAKEFUN_OUTPUT_DIR || "/output";
+mkdirSync(outDir, { recursive: true });
+copyFileSync(sourceImage, join(outDir, "entry.png"));
