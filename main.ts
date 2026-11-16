@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+// ai-excited-01: the entry program. It places the image at the output
+// path byte-for-byte, so the judged bytes are exactly the repo bytes.
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const repoDir = dirname(fileURLToPath(import.meta.url));
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
-const source = join(repoDir, "entry.png");
+const root = dirname(fileURLToPath(import.meta.url));
+const target = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+const bytes = readFileSync(resolve(root, "entry.png"));
 
-if (!existsSync(source)) {
-  throw new Error(`entry image not found: ${source}`);
-}
-
-mkdirSync(outputDir, { recursive: true });
-copyFileSync(source, join(outputDir, "entry.png"));
+mkdirSync(target, { recursive: true });
+writeFileSync(resolve(target, "entry.png"), bytes);
